@@ -70,8 +70,8 @@ jobs:
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
           chmod +x bin/${{ env.PROVIDER }}-*
-          BINARY=$(ls bin/${{ env.PROVIDER }}-* | head -1)
-          pulumi package get-schema "$BINARY" | jq 'del(.version)
+          mv bin/${{ env.PROVIDER }}-* bin/${{ env.PROVIDER }}
+          pulumi package get-schema bin/${{ env.PROVIDER }} | jq 'del(.version)
             | .language.nodejs.packageName = "pulumi-improvmx"
             | .language.python.packageName = "pulumi_improvmx"
           ' > schema.json
