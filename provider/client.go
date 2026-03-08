@@ -24,16 +24,22 @@ func (e *APIError) Error() string {
 
 // IsAlreadyExists checks if the API error indicates the resource already exists.
 func (e *APIError) IsAlreadyExists() bool {
+	keywords := []string{"already", "registered", "exists", "update the existing"}
 	for _, v := range e.Errors {
-		if strings.Contains(strings.ToLower(v), "already") ||
-			strings.Contains(strings.ToLower(v), "registered") ||
-			strings.Contains(strings.ToLower(v), "exists") {
+		lower := strings.ToLower(v)
+		for _, kw := range keywords {
+			if strings.Contains(lower, kw) {
+				return true
+			}
+		}
+	}
+	lower := strings.ToLower(e.Message)
+	for _, kw := range keywords {
+		if strings.Contains(lower, kw) {
 			return true
 		}
 	}
-	return strings.Contains(strings.ToLower(e.Message), "already") ||
-		strings.Contains(strings.ToLower(e.Message), "registered") ||
-		strings.Contains(strings.ToLower(e.Message), "exists")
+	return false
 }
 
 // Response types
