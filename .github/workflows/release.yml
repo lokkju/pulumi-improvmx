@@ -43,14 +43,16 @@ jobs:
           VERSION="${GITHUB_REF_NAME#v}"
           EXT=""
           if [ "$GOOS" = "windows" ]; then EXT=".exe"; fi
-          go build -o "${{ env.PROVIDER }}-v${VERSION}-${GOOS}-${GOARCH}${EXT}" \
+          mkdir -p dist/
+          go build -o "dist/${{ env.PROVIDER }}${EXT}" \
             -ldflags "-X github.com/lokkju/pulumi-improvmx/provider.Version=${VERSION}" \
             ./provider/cmd/${{ env.PROVIDER }}
+          tar czf "${{ env.PROVIDER }}-v${VERSION}-${GOOS}-${GOARCH}.tar.gz" -C dist/ "${{ env.PROVIDER }}${EXT}"
         shell: bash
       - uses: actions/upload-artifact@v4
         with:
           name: provider-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: ${{ env.PROVIDER }}-*
+          path: ${{ env.PROVIDER }}-*.tar.gz
 
   generate-sdks:
     needs: build-provider
@@ -69,8 +71,9 @@ jobs:
       - name: Generate schema and SDKs
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
-          chmod +x bin/${{ env.PROVIDER }}-*
-          mv bin/${{ env.PROVIDER }}-* bin/${{ env.PROVIDER }}
+          tar xzf bin/*.tar.gz -C bin/
+          rm -f bin/*.tar.gz
+          chmod +x bin/${{ env.PROVIDER }}
           pulumi package get-schema ./bin/${{ env.PROVIDER }} | jq -f scripts/patch-schema.jq > schema.json
           pulumi package gen-sdk --language python schema.json --version "$VERSION"
           pulumi package gen-sdk --language nodejs schema.json --version "$VERSION"
@@ -98,18 +101,9 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: artifacts/
-      - name: Create tarball archives
-        run: |
-          mkdir -p release/
-          for dir in artifacts/provider-*/; do
-            for binary in "$dir"*; do
-              name=$(basename "$binary")
-              tar czf "release/${name}.tar.gz" -C "$(dirname "$binary")" "$name"
-            done
-          done
       - uses: softprops/action-gh-release@v2
         with:
-          files: release/*.tar.gz
+          files: artifacts/**/*.tar.gz
           generate_release_notes: true
 
   publish-python:

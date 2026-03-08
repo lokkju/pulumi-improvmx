@@ -2,7 +2,15 @@
   "name": "improvmx",
   "displayName": "ImprovMX",
   "description": "Manage ImprovMX email forwarding resources.",
+  "keywords": [
+    "kind/native",
+    "category/utility"
+  ],
   "homepage": "https://improvmx.com",
+  "repository": "https://github.com/lokkju/pulumi-improvmx",
+  "logoUrl": "https://cdn.prod.website-files.com/67ea96f9cdde898f000bb46b/67ea990358b4c214f79c7bf6_fi0.png",
+  "pluginDownloadURL": "github://api.github.com/lokkju/pulumi-improvmx",
+  "publisher": "lokkju",
   "namespace": "lokkju",
   "language": {
     "csharp": {
@@ -10,7 +18,7 @@
     },
     "go": {
       "generateResourceContainerTypes": true,
-      "importBasePath": "github.com/lokkju/improvmx/sdk/go/improvmx",
+      "importBasePath": "https://github.com/lokkju/pulumi-improvmx/sdk/go/improvmx",
       "respectSchemaVersion": true
     },
     "nodejs": {

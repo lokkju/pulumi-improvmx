@@ -18,6 +18,11 @@ func Provider() p.Provider {
 		WithDescription("Manage ImprovMX email forwarding resources.").
 		WithHomepage("https://improvmx.com").
 		WithNamespace("lokkju").
+		WithPublisher("lokkju").
+		WithRepository("https://github.com/lokkju/pulumi-improvmx").
+		WithLogoURL("https://cdn.prod.website-files.com/67ea96f9cdde898f000bb46b/67ea990358b4c214f79c7bf6_fi0.png").
+		WithPluginDownloadURL("github://api.github.com/lokkju/pulumi-improvmx").
+		WithKeywords("kind/native", "category/utility").
 		WithConfig(infer.Config(&ProviderConfig{})).
 		WithResources(
 			infer.Resource(Domain{}),
