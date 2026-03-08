@@ -149,6 +149,7 @@ jobs:
       - name: Publish to npm
         run: |
           cd sdk/nodejs
+          npm pkg delete repository 2>/dev/null || true
           npm pkg set repository.type=git repository.url=https://github.com/lokkju/pulumi-improvmx
           npm install
           npm publish --provenance --access public
