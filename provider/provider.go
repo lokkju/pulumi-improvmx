@@ -21,6 +21,8 @@ func Provider() p.Provider {
 		WithConfig(infer.Config(&ProviderConfig{})).
 		WithResources(
 			infer.Resource(Domain{}),
+			infer.Resource(EmailAlias{}),
+			infer.Resource(SmtpCredential{}),
 		).
 		WithModuleMap(map[tokens.ModuleName]tokens.ModuleName{
 			"provider": "index",
