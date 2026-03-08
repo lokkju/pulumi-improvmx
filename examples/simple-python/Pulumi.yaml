@@ -1,0 +1,7 @@
+name: improvmx-example
+runtime:
+  name: python
+  options:
+    toolchain: pip
+    virtualenv: .venv
+description: Example using pulumi-improvmx provider

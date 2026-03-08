@@ -1,0 +1,189 @@
+{
+  "name": "improvmx",
+  "displayName": "ImprovMX",
+  "description": "Manage ImprovMX email forwarding resources.",
+  "homepage": "https://improvmx.com",
+  "namespace": "lokkju",
+  "language": {
+    "csharp": {
+      "respectSchemaVersion": true
+    },
+    "go": {
+      "generateResourceContainerTypes": true,
+      "importBasePath": "github.com/lokkju/improvmx/sdk/go/improvmx",
+      "respectSchemaVersion": true
+    },
+    "nodejs": {
+      "respectSchemaVersion": true
+    },
+    "python": {
+      "pyproject": {
+        "enabled": true
+      },
+      "respectSchemaVersion": true
+    }
+  },
+  "config": {
+    "variables": {
+      "apiToken": {
+        "type": "string",
+        "description": "The ImprovMX API token. Can also be set via IMPROVMX_API_TOKEN env var.",
+        "secret": true
+      }
+    }
+  },
+  "provider": {
+    "properties": {
+      "apiToken": {
+        "type": "string",
+        "description": "The ImprovMX API token. Can also be set via IMPROVMX_API_TOKEN env var.",
+        "secret": true
+      }
+    },
+    "inputProperties": {
+      "apiToken": {
+        "type": "string",
+        "description": "The ImprovMX API token. Can also be set via IMPROVMX_API_TOKEN env var.",
+        "secret": true
+      }
+    }
+  },
+  "resources": {
+    "improvmx:index:Domain": {
+      "description": "Manages an ImprovMX domain for email forwarding.",
+      "properties": {
+        "active": {
+          "type": "boolean",
+          "description": "Whether the domain's DNS is correctly configured."
+        },
+        "display": {
+          "type": "string",
+          "description": "Display name of the domain."
+        },
+        "domain": {
+          "type": "string",
+          "description": "The domain name to register with ImprovMX."
+        },
+        "notificationEmail": {
+          "type": "string",
+          "description": "Email address for delivery notifications."
+        },
+        "webhook": {
+          "type": "string",
+          "description": "Webhook URL for delivery notifications."
+        }
+      },
+      "required": [
+        "domain",
+        "active",
+        "display"
+      ],
+      "inputProperties": {
+        "domain": {
+          "type": "string",
+          "description": "The domain name to register with ImprovMX."
+        },
+        "notificationEmail": {
+          "type": "string",
+          "description": "Email address for delivery notifications."
+        },
+        "webhook": {
+          "type": "string",
+          "description": "Webhook URL for delivery notifications."
+        }
+      },
+      "requiredInputs": [
+        "domain"
+      ]
+    },
+    "improvmx:index:EmailAlias": {
+      "description": "Manages an ImprovMX email alias (forwarding rule).",
+      "properties": {
+        "alias": {
+          "type": "string",
+          "description": "The alias name (e.g., 'info', '*' for catch-all)."
+        },
+        "domain": {
+          "type": "string",
+          "description": "The domain this alias belongs to."
+        },
+        "forward": {
+          "type": "string",
+          "description": "Comma-separated destination email addresses."
+        }
+      },
+      "required": [
+        "domain",
+        "alias",
+        "forward"
+      ],
+      "inputProperties": {
+        "alias": {
+          "type": "string",
+          "description": "The alias name (e.g., 'info', '*' for catch-all)."
+        },
+        "domain": {
+          "type": "string",
+          "description": "The domain this alias belongs to."
+        },
+        "forward": {
+          "type": "string",
+          "description": "Comma-separated destination email addresses."
+        }
+      },
+      "requiredInputs": [
+        "domain",
+        "alias",
+        "forward"
+      ]
+    },
+    "improvmx:index:SmtpCredential": {
+      "description": "Manages an ImprovMX SMTP credential for sending email.",
+      "properties": {
+        "created": {
+          "type": "integer",
+          "description": "Unix timestamp when the credential was created."
+        },
+        "domain": {
+          "type": "string",
+          "description": "The domain this SMTP credential belongs to."
+        },
+        "password": {
+          "type": "string",
+          "description": "The SMTP password.",
+          "secret": true
+        },
+        "username": {
+          "type": "string",
+          "description": "The SMTP username."
+        }
+      },
+      "required": [
+        "domain",
+        "username",
+        "password",
+        "created"
+      ],
+      "inputProperties": {
+        "domain": {
+          "type": "string",
+          "description": "The domain this SMTP credential belongs to."
+        },
+        "password": {
+          "type": "string",
+          "description": "The SMTP password.",
+          "secret": true
+        },
+        "username": {
+          "type": "string",
+          "description": "The SMTP username."
+        }
+      },
+      "requiredInputs": [
+        "domain",
+        "username",
+        "password"
+      ]
+    }
+  }
+}
