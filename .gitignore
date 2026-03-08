@@ -1,0 +1,6 @@
+bin/
+sdk/python/
+sdk/nodejs/
+sdk/dotnet/
+sdk/java/
+*.test
