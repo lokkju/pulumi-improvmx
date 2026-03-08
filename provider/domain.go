@@ -68,10 +68,24 @@ func (Domain) Create(ctx context.Context, req infer.CreateRequest[DomainArgs]) (
 	domain, err := client.CreateDomain(input.Domain, notifEmail)
 	if err != nil {
 		if apiErr, ok := err.(*APIError); ok && apiErr.IsAlreadyExists() {
-			// Domain already registered — adopt the existing resource.
-			domain, err = client.GetDomain(input.Domain)
-			if err != nil {
-				return infer.CreateResponse[DomainState]{}, fmt.Errorf("adopting existing domain: %w", err)
+			// Domain already registered — adopt and sync optional fields.
+			fields := map[string]string{}
+			if input.NotificationEmail != nil {
+				fields["notification_email"] = *input.NotificationEmail
+			}
+			if input.Webhook != nil {
+				fields["webhook"] = *input.Webhook
+			}
+			if len(fields) > 0 {
+				domain, err = client.UpdateDomain(input.Domain, fields)
+				if err != nil {
+					return infer.CreateResponse[DomainState]{}, fmt.Errorf("updating adopted domain: %w", err)
+				}
+			} else {
+				domain, err = client.GetDomain(input.Domain)
+				if err != nil {
+					return infer.CreateResponse[DomainState]{}, fmt.Errorf("adopting existing domain: %w", err)
+				}
 			}
 		} else {
 			return infer.CreateResponse[DomainState]{}, fmt.Errorf("creating domain: %w", err)
@@ -92,6 +106,9 @@ func (Domain) Read(ctx context.Context, req infer.ReadRequest[DomainArgs, Domain
 	client := getClient(ctx)
 	domain, err := client.GetDomain(req.ID)
 	if err != nil {
+		if apiErr, ok := err.(*APIError); ok && apiErr.IsNotFound() {
+			return infer.ReadResponse[DomainArgs, DomainState]{ID: ""}, nil
+		}
 		return infer.ReadResponse[DomainArgs, DomainState]{}, fmt.Errorf("reading domain: %w", err)
 	}
 
@@ -150,6 +167,9 @@ func (Domain) Update(ctx context.Context, req infer.UpdateRequest[DomainArgs, Do
 func (Domain) Delete(ctx context.Context, req infer.DeleteRequest[DomainState]) (infer.DeleteResponse, error) {
 	client := getClient(ctx)
 	if err := client.DeleteDomain(req.ID); err != nil {
+		if apiErr, ok := err.(*APIError); ok && apiErr.IsNotFound() {
+			return infer.DeleteResponse{}, nil
+		}
 		return infer.DeleteResponse{}, fmt.Errorf("deleting domain: %w", err)
 	}
 	return infer.DeleteResponse{}, nil

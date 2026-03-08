@@ -81,6 +81,9 @@ func (EmailAlias) Read(ctx context.Context, req infer.ReadRequest[EmailAliasArgs
 	client := getClient(ctx)
 	alias, err := client.GetAlias(domain, aliasName)
 	if err != nil {
+		if apiErr, ok := err.(*APIError); ok && apiErr.IsNotFound() {
+			return infer.ReadResponse[EmailAliasArgs, EmailAliasState]{ID: ""}, nil
+		}
 		return infer.ReadResponse[EmailAliasArgs, EmailAliasState]{}, fmt.Errorf("reading alias: %w", err)
 	}
 
@@ -114,6 +117,9 @@ func (EmailAlias) Delete(ctx context.Context, req infer.DeleteRequest[EmailAlias
 	domain, aliasName := parseAliasID(req.ID)
 	client := getClient(ctx)
 	if err := client.DeleteAlias(domain, aliasName); err != nil {
+		if apiErr, ok := err.(*APIError); ok && apiErr.IsNotFound() {
+			return infer.DeleteResponse{}, nil
+		}
 		return infer.DeleteResponse{}, fmt.Errorf("deleting alias: %w", err)
 	}
 	return infer.DeleteResponse{}, nil

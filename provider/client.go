@@ -42,6 +42,29 @@ func (e *APIError) IsAlreadyExists() bool {
 	return false
 }
 
+// IsNotFound checks if the API error indicates the resource was not found.
+func (e *APIError) IsNotFound() bool {
+	if e.StatusCode == 404 {
+		return true
+	}
+	keywords := []string{"not found", "not_found", "does not exist"}
+	lower := strings.ToLower(e.Message)
+	for _, kw := range keywords {
+		if strings.Contains(lower, kw) {
+			return true
+		}
+	}
+	for _, v := range e.Errors {
+		lower := strings.ToLower(v)
+		for _, kw := range keywords {
+			if strings.Contains(lower, kw) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 // Response types
 
 type DomainInfo struct {

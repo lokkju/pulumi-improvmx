@@ -94,6 +94,9 @@ func (SmtpCredential) Read(ctx context.Context, req infer.ReadRequest[SmtpCreden
 
 	creds, err := client.ListSmtpCredentials(domain)
 	if err != nil {
+		if apiErr, ok := err.(*APIError); ok && apiErr.IsNotFound() {
+			return infer.ReadResponse[SmtpCredentialArgs, SmtpCredentialState]{ID: ""}, nil
+		}
 		return infer.ReadResponse[SmtpCredentialArgs, SmtpCredentialState]{}, fmt.Errorf("reading SMTP credentials: %w", err)
 	}
 
@@ -115,7 +118,8 @@ func (SmtpCredential) Read(ctx context.Context, req infer.ReadRequest[SmtpCreden
 		}
 	}
 
-	return infer.ReadResponse[SmtpCredentialArgs, SmtpCredentialState]{}, fmt.Errorf("SMTP credential %s not found", req.ID)
+	// Credential not found — signal deletion.
+	return infer.ReadResponse[SmtpCredentialArgs, SmtpCredentialState]{ID: ""}, nil
 }
 
 func (SmtpCredential) Update(ctx context.Context, req infer.UpdateRequest[SmtpCredentialArgs, SmtpCredentialState]) (infer.UpdateResponse[SmtpCredentialState], error) {
@@ -144,6 +148,9 @@ func (SmtpCredential) Delete(ctx context.Context, req infer.DeleteRequest[SmtpCr
 	domain, username := parseCredentialID(req.ID)
 	client := getClient(ctx)
 	if err := client.DeleteSmtpCredential(domain, username); err != nil {
+		if apiErr, ok := err.(*APIError); ok && apiErr.IsNotFound() {
+			return infer.DeleteResponse{}, nil
+		}
 		return infer.DeleteResponse{}, fmt.Errorf("deleting SMTP credential: %w", err)
 	}
 	return infer.DeleteResponse{}, nil
