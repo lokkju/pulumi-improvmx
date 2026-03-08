@@ -19,7 +19,7 @@ pip install pulumi-improvmx
 ### TypeScript/JavaScript
 
 ```bash
-npm install @pulumi/improvmx
+npm install pulumi-improvmx
 ```
 
 ### Go
@@ -78,6 +78,46 @@ make codegen
 # Lint
 make lint
 ```
+
+## Releasing
+
+Releases are triggered by pushing a version tag:
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+This builds provider binaries (linux/darwin/windows, amd64/arm64), creates a GitHub Release, generates SDKs, and publishes to PyPI and npm.
+
+### Trusted Publishing Setup
+
+Both PyPI and npm use OIDC trusted publishing — no API tokens or secrets are stored in GitHub.
+
+#### PyPI
+
+1. Go to [pypi.org](https://pypi.org) → your account → Publishing → "Add a new pending publisher"
+2. Configure:
+   - **Package name:** `pulumi_improvmx`
+   - **Owner:** `lokkju`
+   - **Repository:** `pulumi-improvmx`
+   - **Workflow:** `release.yml`
+   - **Environment:** `pypi`
+3. Ensure a `pypi` environment exists in GitHub repo settings (Settings → Environments)
+
+#### npm
+
+1. Publish the package once manually (npm requires the package to exist first):
+   ```bash
+   cd sdk/nodejs && npm install && npm publish --access public
+   ```
+2. Add the trusted publisher:
+   ```bash
+   npx npm@latest trust github pulumi-improvmx --file release.yml --repository lokkju/pulumi-improvmx --environment npm --yes
+   ```
+3. Ensure an `npm` environment exists in GitHub repo settings (Settings → Environments)
+
+After setup, all subsequent releases publish automatically via GitHub Actions with no tokens needed.
 
 ## License
 
