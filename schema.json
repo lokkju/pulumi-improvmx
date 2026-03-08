@@ -14,13 +14,15 @@
       "respectSchemaVersion": true
     },
     "nodejs": {
-      "respectSchemaVersion": true
+      "respectSchemaVersion": true,
+      "packageName": "pulumi-improvmx"
     },
     "python": {
       "pyproject": {
         "enabled": true
       },
-      "respectSchemaVersion": true
+      "respectSchemaVersion": true,
+      "packageName": "pulumi_improvmx"
     }
   },
   "config": {

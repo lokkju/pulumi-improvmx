@@ -71,7 +71,10 @@ jobs:
           VERSION="${GITHUB_REF_NAME#v}"
           chmod +x bin/${{ env.PROVIDER }}-*
           BINARY=$(ls bin/${{ env.PROVIDER }}-* | head -1)
-          pulumi package get-schema "$BINARY" | jq 'del(.version)' > schema.json
+          pulumi package get-schema "$BINARY" | jq 'del(.version)
+            | .language.nodejs.packageName = "pulumi-improvmx"
+            | .language.python.packageName = "pulumi_improvmx"
+          ' > schema.json
           pulumi package gen-sdk --language python schema.json --version "$VERSION"
           pulumi package gen-sdk --language nodejs schema.json --version "$VERSION"
           pulumi package gen-sdk --language dotnet schema.json --version "$VERSION"
@@ -141,6 +144,9 @@ jobs:
     needs: generate-sdks
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
+    environment: npm
+    permissions:
+      id-token: write
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -148,11 +154,9 @@ jobs:
           path: sdk/nodejs/
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           registry-url: https://registry.npmjs.org
       - name: Publish to npm
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           cd sdk/nodejs
           npm install

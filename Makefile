@@ -14,7 +14,7 @@ provider:
 		$(PROJECT)/provider/cmd/$(PROVIDER)
 
 $(SCHEMA_FILE): provider
-	pulumi package get-schema $(WORKING_DIR)/bin/${PROVIDER} | jq 'del(.version)' > $(SCHEMA_FILE)
+	pulumi package get-schema $(WORKING_DIR)/bin/${PROVIDER} | jq 'del(.version) | .language.nodejs.packageName = "pulumi-improvmx" | .language.python.packageName = "pulumi_improvmx"' > $(SCHEMA_FILE)
 
 .PHONY: codegen
 codegen: $(SCHEMA_FILE) sdk/python sdk/nodejs sdk/go sdk/dotnet
