@@ -64,7 +64,12 @@
         },
         "domain": {
           "type": "string",
-          "description": "The domain name to register with ImprovMX."
+          "description": "The domain name to register with ImprovMX.",
+          "language": {
+            "csharp": {
+              "name": "DomainName"
+            }
+          }
         },
         "notificationEmail": {
           "type": "string",
@@ -83,7 +88,12 @@
       "inputProperties": {
         "domain": {
           "type": "string",
-          "description": "The domain name to register with ImprovMX."
+          "description": "The domain name to register with ImprovMX.",
+          "language": {
+            "csharp": {
+              "name": "DomainName"
+            }
+          }
         },
         "notificationEmail": {
           "type": "string",
@@ -107,7 +117,12 @@
         },
         "domain": {
           "type": "string",
-          "description": "The domain this alias belongs to."
+          "description": "The domain this alias belongs to.",
+          "language": {
+            "csharp": {
+              "name": "DomainName"
+            }
+          }
         },
         "forward": {
           "type": "string",
@@ -126,7 +141,12 @@
         },
         "domain": {
           "type": "string",
-          "description": "The domain this alias belongs to."
+          "description": "The domain this alias belongs to.",
+          "language": {
+            "csharp": {
+              "name": "DomainName"
+            }
+          }
         },
         "forward": {
           "type": "string",
@@ -148,7 +168,12 @@
         },
         "domain": {
           "type": "string",
-          "description": "The domain this SMTP credential belongs to."
+          "description": "The domain this SMTP credential belongs to.",
+          "language": {
+            "csharp": {
+              "name": "DomainName"
+            }
+          }
         },
         "password": {
           "type": "string",
@@ -169,7 +194,12 @@
       "inputProperties": {
         "domain": {
           "type": "string",
-          "description": "The domain this SMTP credential belongs to."
+          "description": "The domain this SMTP credential belongs to.",
+          "language": {
+            "csharp": {
+              "name": "DomainName"
+            }
+          }
         },
         "password": {
           "type": "string",

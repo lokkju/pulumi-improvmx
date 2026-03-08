@@ -71,10 +71,7 @@ jobs:
           VERSION="${GITHUB_REF_NAME#v}"
           chmod +x bin/${{ env.PROVIDER }}-*
           mv bin/${{ env.PROVIDER }}-* bin/${{ env.PROVIDER }}
-          pulumi package get-schema ./bin/${{ env.PROVIDER }} | jq 'del(.version)
-            | .language.nodejs.packageName = "pulumi-improvmx"
-            | .language.python.packageName = "pulumi_improvmx"
-          ' > schema.json
+          pulumi package get-schema ./bin/${{ env.PROVIDER }} | jq -f scripts/patch-schema.jq > schema.json
           pulumi package gen-sdk --language python schema.json --version "$VERSION"
           pulumi package gen-sdk --language nodejs schema.json --version "$VERSION"
           pulumi package gen-sdk --language dotnet schema.json --version "$VERSION"
