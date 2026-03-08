@@ -117,6 +117,20 @@ Both PyPI and npm use OIDC trusted publishing — no API tokens or secrets are s
    ```
 3. Ensure an `npm` environment exists in GitHub repo settings (Settings → Environments)
 
+#### NuGet
+
+1. Log into [nuget.org](https://nuget.org) → your profile → **Trusted Publishing**
+2. Add a new trusted publishing policy:
+   - **Repository Owner:** `lokkju`
+   - **Repository:** `pulumi-improvmx`
+   - **Workflow File:** `release.yml`
+   - **Environment:** `nuget`
+3. Add your nuget.org username (profile name, not email) as a GitHub secret:
+   ```bash
+   gh secret set NUGET_USER --repo lokkju/pulumi-improvmx
+   ```
+4. Ensure a `nuget` environment exists in GitHub repo settings (Settings → Environments)
+
 After setup, all subsequent releases publish automatically via GitHub Actions with no tokens needed.
 
 ## License
