@@ -1,0 +1,156 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+env:
+  PROVIDER: pulumi-resource-improvmx
+  GO_VERSION: "1.24"
+
+jobs:
+  build-provider:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            goos: linux
+            goarch: amd64
+          - os: ubuntu-latest
+            goos: linux
+            goarch: arm64
+          - os: macos-latest
+            goos: darwin
+            goarch: amd64
+          - os: macos-latest
+            goos: darwin
+            goarch: arm64
+          - os: windows-latest
+            goos: windows
+            goarch: amd64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Build provider binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          EXT=""
+          if [ "$GOOS" = "windows" ]; then EXT=".exe"; fi
+          go build -o "${{ env.PROVIDER }}-v${VERSION}-${GOOS}-${GOARCH}${EXT}" \
+            -ldflags "-X github.com/lokkju/pulumi-improvmx/provider.Version=${VERSION}" \
+            ./provider/cmd/${{ env.PROVIDER }}
+        shell: bash
+      - uses: actions/upload-artifact@v4
+        with:
+          name: provider-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: ${{ env.PROVIDER }}-*
+
+  generate-sdks:
+    needs: build-provider
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - uses: pulumi/actions@v6
+      - name: Download linux-amd64 provider
+        uses: actions/download-artifact@v4
+        with:
+          name: provider-linux-amd64
+          path: bin/
+      - name: Generate schema and SDKs
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          chmod +x bin/${{ env.PROVIDER }}-*
+          BINARY=$(ls bin/${{ env.PROVIDER }}-* | head -1)
+          pulumi package get-schema "$BINARY" | jq 'del(.version)' > schema.json
+          pulumi package gen-sdk --language python schema.json --version "$VERSION"
+          pulumi package gen-sdk --language nodejs schema.json --version "$VERSION"
+          pulumi package gen-sdk --language dotnet schema.json --version "$VERSION"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdk-python
+          path: sdk/python/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdk-nodejs
+          path: sdk/nodejs/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdk-dotnet
+          path: sdk/dotnet/
+
+  github-release:
+    needs: build-provider
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+      - name: Create tarball archives
+        run: |
+          mkdir -p release/
+          for dir in artifacts/provider-*/; do
+            for binary in "$dir"*; do
+              name=$(basename "$binary")
+              tar czf "release/${name}.tar.gz" -C "$(dirname "$binary")" "$name"
+            done
+          done
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: release/*.tar.gz
+          generate_release_notes: true
+
+  publish-python:
+    needs: generate-sdks
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: sdk-python
+          path: sdk/python/
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Build and publish to PyPI
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          pip install build twine
+          cd sdk/python
+          python -m build
+          twine upload dist/*
+
+  publish-npm:
+    needs: generate-sdks
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: sdk-nodejs
+          path: sdk/nodejs/
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          cd sdk/nodejs
+          npm install
+          npm publish --access public
