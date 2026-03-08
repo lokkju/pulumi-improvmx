@@ -20,7 +20,7 @@ func Provider() p.Provider {
 		WithNamespace("lokkju").
 		WithPublisher("lokkju").
 		WithRepository("https://github.com/lokkju/pulumi-improvmx").
-		WithLogoURL("https://raw.githubusercontent.com/lokkju/pulumi-improvmx/main/docs/improvmx-logo.svg").
+		WithLogoURL("https://raw.githubusercontent.com/lokkju/pulumi-improvmx/main/docs/improvmx-logo.png").
 		WithPluginDownloadURL("github://api.github.com/lokkju/pulumi-improvmx").
 		WithKeywords("kind/native", "category/utility").
 		WithConfig(infer.Config(&ProviderConfig{})).
