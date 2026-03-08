@@ -1,5 +1,12 @@
 # Pulumi ImprovMX Provider
 
+[![CI](https://github.com/lokkju/pulumi-improvmx/actions/workflows/ci.yml/badge.svg)](https://github.com/lokkju/pulumi-improvmx/actions/workflows/ci.yml)
+[![Release](https://github.com/lokkju/pulumi-improvmx/actions/workflows/release.yml/badge.svg)](https://github.com/lokkju/pulumi-improvmx/actions/workflows/release.yml)
+[![PyPI](https://img.shields.io/pypi/v/pulumi-improvmx)](https://pypi.org/project/pulumi-improvmx/)
+[![npm](https://img.shields.io/npm/v/pulumi-improvmx)](https://www.npmjs.com/package/pulumi-improvmx)
+[![NuGet](https://img.shields.io/nuget/v/Lokkju.Improvmx)](https://www.nuget.org/packages/Lokkju.Improvmx)
+[![Go Reference](https://pkg.go.dev/badge/github.com/lokkju/improvmx/sdk/go/improvmx.svg)](https://pkg.go.dev/github.com/lokkju/improvmx/sdk/go/improvmx)
+
 A native Pulumi provider for managing [ImprovMX](https://improvmx.com/) email forwarding resources.
 
 ## Resources
