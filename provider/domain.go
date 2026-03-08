@@ -67,7 +67,15 @@ func (Domain) Create(ctx context.Context, req infer.CreateRequest[DomainArgs]) (
 
 	domain, err := client.CreateDomain(input.Domain, notifEmail)
 	if err != nil {
-		return infer.CreateResponse[DomainState]{}, fmt.Errorf("creating domain: %w", err)
+		if apiErr, ok := err.(*APIError); ok && apiErr.IsAlreadyExists() {
+			// Domain already registered — adopt the existing resource.
+			domain, err = client.GetDomain(input.Domain)
+			if err != nil {
+				return infer.CreateResponse[DomainState]{}, fmt.Errorf("adopting existing domain: %w", err)
+			}
+		} else {
+			return infer.CreateResponse[DomainState]{}, fmt.Errorf("creating domain: %w", err)
+		}
 	}
 
 	return infer.CreateResponse[DomainState]{

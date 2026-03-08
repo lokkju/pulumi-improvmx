@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -19,6 +20,20 @@ type APIError struct {
 
 func (e *APIError) Error() string {
 	return fmt.Sprintf("improvmx API error (%d): %s", e.StatusCode, e.Message)
+}
+
+// IsAlreadyExists checks if the API error indicates the resource already exists.
+func (e *APIError) IsAlreadyExists() bool {
+	for _, v := range e.Errors {
+		if strings.Contains(strings.ToLower(v), "already") ||
+			strings.Contains(strings.ToLower(v), "registered") ||
+			strings.Contains(strings.ToLower(v), "exists") {
+			return true
+		}
+	}
+	return strings.Contains(strings.ToLower(e.Message), "already") ||
+		strings.Contains(strings.ToLower(e.Message), "registered") ||
+		strings.Contains(strings.ToLower(e.Message), "exists")
 }
 
 // Response types

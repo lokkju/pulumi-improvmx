@@ -48,7 +48,22 @@ func (EmailAlias) Create(ctx context.Context, req infer.CreateRequest[EmailAlias
 	client := getClient(ctx)
 	alias, err := client.CreateAlias(input.Domain, input.Alias, input.Forward)
 	if err != nil {
-		return infer.CreateResponse[EmailAliasState]{}, fmt.Errorf("creating alias: %w", err)
+		if apiErr, ok := err.(*APIError); ok && apiErr.IsAlreadyExists() {
+			// Alias already exists — adopt it and update forward if needed.
+			existing, getErr := client.GetAlias(input.Domain, input.Alias)
+			if getErr != nil {
+				return infer.CreateResponse[EmailAliasState]{}, fmt.Errorf("adopting existing alias: %w", getErr)
+			}
+			if existing.Forward != input.Forward {
+				existing, getErr = client.UpdateAlias(input.Domain, input.Alias, input.Forward)
+				if getErr != nil {
+					return infer.CreateResponse[EmailAliasState]{}, fmt.Errorf("updating adopted alias: %w", getErr)
+				}
+			}
+			alias = existing
+		} else {
+			return infer.CreateResponse[EmailAliasState]{}, fmt.Errorf("creating alias: %w", err)
+		}
 	}
 
 	return infer.CreateResponse[EmailAliasState]{

@@ -56,7 +56,27 @@ func (SmtpCredential) Create(ctx context.Context, req infer.CreateRequest[SmtpCr
 	client := getClient(ctx)
 	cred, err := client.CreateSmtpCredential(input.Domain, input.Username, input.Password)
 	if err != nil {
-		return infer.CreateResponse[SmtpCredentialState]{}, fmt.Errorf("creating SMTP credential: %w", err)
+		if apiErr, ok := err.(*APIError); ok && apiErr.IsAlreadyExists() {
+			// Credential already exists — adopt it and update password.
+			if updateErr := client.UpdateSmtpCredential(input.Domain, input.Username, input.Password); updateErr != nil {
+				return infer.CreateResponse[SmtpCredentialState]{}, fmt.Errorf("updating adopted SMTP credential: %w", updateErr)
+			}
+			creds, listErr := client.ListSmtpCredentials(input.Domain)
+			if listErr != nil {
+				return infer.CreateResponse[SmtpCredentialState]{}, fmt.Errorf("adopting existing SMTP credential: %w", listErr)
+			}
+			for _, c := range creds {
+				if c.Username == input.Username {
+					cred = &c
+					break
+				}
+			}
+			if cred == nil {
+				return infer.CreateResponse[SmtpCredentialState]{}, fmt.Errorf("SMTP credential %s not found after adopt", input.Username)
+			}
+		} else {
+			return infer.CreateResponse[SmtpCredentialState]{}, fmt.Errorf("creating SMTP credential: %w", err)
+		}
 	}
 
 	return infer.CreateResponse[SmtpCredentialState]{
