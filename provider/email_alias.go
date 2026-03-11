@@ -45,7 +45,10 @@ func (EmailAlias) Create(ctx context.Context, req infer.CreateRequest[EmailAlias
 		return infer.CreateResponse[EmailAliasState]{ID: id, Output: EmailAliasState{EmailAliasArgs: input}}, nil
 	}
 
-	client := getClient(ctx)
+	client, err := getClient(ctx)
+	if err != nil {
+		return infer.CreateResponse[EmailAliasState]{}, err
+	}
 	alias, err := client.CreateAlias(input.Domain, input.Alias, input.Forward)
 	if err != nil {
 		if apiErr, ok := err.(*APIError); ok && apiErr.IsAlreadyExists() {
@@ -78,7 +81,10 @@ func (EmailAlias) Create(ctx context.Context, req infer.CreateRequest[EmailAlias
 
 func (EmailAlias) Read(ctx context.Context, req infer.ReadRequest[EmailAliasArgs, EmailAliasState]) (infer.ReadResponse[EmailAliasArgs, EmailAliasState], error) {
 	domain, aliasName := parseAliasID(req.ID)
-	client := getClient(ctx)
+	client, err := getClient(ctx)
+	if err != nil {
+		return infer.ReadResponse[EmailAliasArgs, EmailAliasState]{}, err
+	}
 	alias, err := client.GetAlias(domain, aliasName)
 	if err != nil {
 		if apiErr, ok := err.(*APIError); ok && apiErr.IsNotFound() {
@@ -100,7 +106,10 @@ func (EmailAlias) Update(ctx context.Context, req infer.UpdateRequest[EmailAlias
 	}
 
 	domain, aliasName := parseAliasID(req.ID)
-	client := getClient(ctx)
+	client, err := getClient(ctx)
+	if err != nil {
+		return infer.UpdateResponse[EmailAliasState]{}, err
+	}
 	alias, err := client.UpdateAlias(domain, aliasName, input.Forward)
 	if err != nil {
 		return infer.UpdateResponse[EmailAliasState]{}, fmt.Errorf("updating alias: %w", err)
@@ -115,7 +124,10 @@ func (EmailAlias) Update(ctx context.Context, req infer.UpdateRequest[EmailAlias
 
 func (EmailAlias) Delete(ctx context.Context, req infer.DeleteRequest[EmailAliasState]) (infer.DeleteResponse, error) {
 	domain, aliasName := parseAliasID(req.ID)
-	client := getClient(ctx)
+	client, err := getClient(ctx)
+	if err != nil {
+		return infer.DeleteResponse{}, err
+	}
 	if err := client.DeleteAlias(domain, aliasName); err != nil {
 		if apiErr, ok := err.(*APIError); ok && apiErr.IsNotFound() {
 			return infer.DeleteResponse{}, nil
@@ -136,8 +148,10 @@ func (EmailAlias) Diff(ctx context.Context, req infer.DiffRequest[EmailAliasArgs
 	if req.Inputs.Forward != req.State.Forward {
 		diff["forward"] = p.PropertyDiff{Kind: p.Update}
 	}
+	_, domainReplace := diff["domain"]
+	_, aliasReplace := diff["alias"]
 	return infer.DiffResponse{
-		DeleteBeforeReplace: true,
+		DeleteBeforeReplace: domainReplace || aliasReplace,
 		HasChanges:          len(diff) > 0,
 		DetailedDiff:        diff,
 	}, nil

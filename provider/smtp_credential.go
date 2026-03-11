@@ -53,7 +53,10 @@ func (SmtpCredential) Create(ctx context.Context, req infer.CreateRequest[SmtpCr
 		}, nil
 	}
 
-	client := getClient(ctx)
+	client, err := getClient(ctx)
+	if err != nil {
+		return infer.CreateResponse[SmtpCredentialState]{}, err
+	}
 	cred, err := client.CreateSmtpCredential(input.Domain, input.Username, input.Password)
 	if err != nil {
 		if apiErr, ok := err.(*APIError); ok && apiErr.IsAlreadyExists() {
@@ -90,7 +93,10 @@ func (SmtpCredential) Create(ctx context.Context, req infer.CreateRequest[SmtpCr
 
 func (SmtpCredential) Read(ctx context.Context, req infer.ReadRequest[SmtpCredentialArgs, SmtpCredentialState]) (infer.ReadResponse[SmtpCredentialArgs, SmtpCredentialState], error) {
 	domain, username := parseCredentialID(req.ID)
-	client := getClient(ctx)
+	client, err := getClient(ctx)
+	if err != nil {
+		return infer.ReadResponse[SmtpCredentialArgs, SmtpCredentialState]{}, err
+	}
 
 	creds, err := client.ListSmtpCredentials(domain)
 	if err != nil {
@@ -131,7 +137,10 @@ func (SmtpCredential) Update(ctx context.Context, req infer.UpdateRequest[SmtpCr
 	}
 
 	domain, username := parseCredentialID(req.ID)
-	client := getClient(ctx)
+	client, err := getClient(ctx)
+	if err != nil {
+		return infer.UpdateResponse[SmtpCredentialState]{}, err
+	}
 	if err := client.UpdateSmtpCredential(domain, username, input.Password); err != nil {
 		return infer.UpdateResponse[SmtpCredentialState]{}, fmt.Errorf("updating SMTP credential: %w", err)
 	}
@@ -146,7 +155,10 @@ func (SmtpCredential) Update(ctx context.Context, req infer.UpdateRequest[SmtpCr
 
 func (SmtpCredential) Delete(ctx context.Context, req infer.DeleteRequest[SmtpCredentialState]) (infer.DeleteResponse, error) {
 	domain, username := parseCredentialID(req.ID)
-	client := getClient(ctx)
+	client, err := getClient(ctx)
+	if err != nil {
+		return infer.DeleteResponse{}, err
+	}
 	if err := client.DeleteSmtpCredential(domain, username); err != nil {
 		if apiErr, ok := err.(*APIError); ok && apiErr.IsNotFound() {
 			return infer.DeleteResponse{}, nil
@@ -167,8 +179,10 @@ func (SmtpCredential) Diff(ctx context.Context, req infer.DiffRequest[SmtpCreden
 	if req.Inputs.Password != req.State.Password {
 		diff["password"] = p.PropertyDiff{Kind: p.Update}
 	}
+	_, domainReplace := diff["domain"]
+	_, usernameReplace := diff["username"]
 	return infer.DiffResponse{
-		DeleteBeforeReplace: true,
+		DeleteBeforeReplace: domainReplace || usernameReplace,
 		HasChanges:          len(diff) > 0,
 		DetailedDiff:        diff,
 	}, nil

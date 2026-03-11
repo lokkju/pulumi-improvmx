@@ -38,16 +38,16 @@ func (d *DomainState) Annotate(a infer.Annotator) {
 	a.Describe(&d.Display, "Display name of the domain.")
 }
 
-func getClient(ctx context.Context) *ImprovMXClient {
+func getClient(ctx context.Context) (*ImprovMXClient, error) {
 	config := infer.GetConfig[ProviderConfig](ctx)
 	token := config.ApiToken
 	if token == "" {
 		token = os.Getenv("IMPROVMX_API_TOKEN")
 	}
 	if token == "" {
-		p.GetLogger(ctx).Errorf("ImprovMX API token not configured")
+		return nil, fmt.Errorf("ImprovMX API token not configured: set improvmx:apiToken in Pulumi config or IMPROVMX_API_TOKEN env var")
 	}
-	return NewImprovMXClient(token)
+	return NewImprovMXClient(token), nil
 }
 
 func (Domain) Create(ctx context.Context, req infer.CreateRequest[DomainArgs]) (infer.CreateResponse[DomainState], error) {
@@ -59,7 +59,10 @@ func (Domain) Create(ctx context.Context, req infer.CreateRequest[DomainArgs]) (
 		}, nil
 	}
 
-	client := getClient(ctx)
+	client, err := getClient(ctx)
+	if err != nil {
+		return infer.CreateResponse[DomainState]{}, err
+	}
 	notifEmail := ""
 	if input.NotificationEmail != nil {
 		notifEmail = *input.NotificationEmail
@@ -103,7 +106,10 @@ func (Domain) Create(ctx context.Context, req infer.CreateRequest[DomainArgs]) (
 }
 
 func (Domain) Read(ctx context.Context, req infer.ReadRequest[DomainArgs, DomainState]) (infer.ReadResponse[DomainArgs, DomainState], error) {
-	client := getClient(ctx)
+	client, err := getClient(ctx)
+	if err != nil {
+		return infer.ReadResponse[DomainArgs, DomainState]{}, err
+	}
 	domain, err := client.GetDomain(req.ID)
 	if err != nil {
 		if apiErr, ok := err.(*APIError); ok && apiErr.IsNotFound() {
@@ -141,7 +147,10 @@ func (Domain) Update(ctx context.Context, req infer.UpdateRequest[DomainArgs, Do
 		}, nil
 	}
 
-	client := getClient(ctx)
+	client, err := getClient(ctx)
+	if err != nil {
+		return infer.UpdateResponse[DomainState]{}, err
+	}
 	fields := map[string]string{}
 	if input.NotificationEmail != nil {
 		fields["notification_email"] = *input.NotificationEmail
@@ -165,7 +174,10 @@ func (Domain) Update(ctx context.Context, req infer.UpdateRequest[DomainArgs, Do
 }
 
 func (Domain) Delete(ctx context.Context, req infer.DeleteRequest[DomainState]) (infer.DeleteResponse, error) {
-	client := getClient(ctx)
+	client, err := getClient(ctx)
+	if err != nil {
+		return infer.DeleteResponse{}, err
+	}
 	if err := client.DeleteDomain(req.ID); err != nil {
 		if apiErr, ok := err.(*APIError); ok && apiErr.IsNotFound() {
 			return infer.DeleteResponse{}, nil
@@ -188,8 +200,9 @@ func (Domain) Diff(ctx context.Context, req infer.DiffRequest[DomainArgs, Domain
 		diff["webhook"] = p.PropertyDiff{Kind: p.Update}
 	}
 
+	_, hasReplace := diff["domain"]
 	return infer.DiffResponse{
-		DeleteBeforeReplace: true,
+		DeleteBeforeReplace: hasReplace,
 		HasChanges:          len(diff) > 0,
 		DetailedDiff:        diff,
 	}, nil

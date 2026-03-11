@@ -139,6 +139,10 @@ func (c *ImprovMXClient) request(method, path string, body any) ([]byte, error) 
 	}
 	json.Unmarshal(respBody, &result)
 
+	if resp.StatusCode == 401 || resp.StatusCode == 403 {
+		return nil, fmt.Errorf("improvmx authentication failed (HTTP %d): check that IMPROVMX_API_TOKEN or improvmx:apiToken is set correctly", resp.StatusCode)
+	}
+
 	if resp.StatusCode >= 400 || !result.Success {
 		return nil, &APIError{
 			StatusCode: resp.StatusCode,

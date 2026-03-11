@@ -120,6 +120,7 @@ func TestCreateSmtpCredential(t *testing.T) {
 }
 
 func TestAPIError(t *testing.T) {
+	// 401 returns a hard authentication error (not an APIError)
 	client := newTestClient(func(w http.ResponseWriter, r *http.Request) {
 		jsonResponse(w, 401, map[string]any{
 			"success": false,
@@ -128,9 +129,20 @@ func TestAPIError(t *testing.T) {
 	})
 	_, err := client.ListDomains()
 	require.Error(t, err)
+	assert.Contains(t, err.Error(), "authentication failed")
+
+	// 400 returns an APIError
+	client400 := newTestClient(func(w http.ResponseWriter, r *http.Request) {
+		jsonResponse(w, 400, map[string]any{
+			"success": false,
+			"errors":  map[string]string{"domain": "already registered"},
+		})
+	})
+	_, err = client400.ListDomains()
+	require.Error(t, err)
 	var apiErr *APIError
 	require.ErrorAs(t, err, &apiErr)
-	assert.Equal(t, 401, apiErr.StatusCode)
+	assert.Equal(t, 400, apiErr.StatusCode)
 }
 
 func TestBasicAuth(t *testing.T) {
