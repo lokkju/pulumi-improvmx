@@ -38,8 +38,7 @@ test:
 
 .PHONY: test_live
 test_live:
-	set -a && [ -f .env.local ] && . .env.local || true; set +a; \
-	IMPROVMX_LIVE_TEST=1 go test -v -count=1 -run 'TestLive|TestLifecycle' -timeout 10m ./provider/...
+	bash -c 'set -a; [ -f .env.local ] && source .env.local; set +a; IMPROVMX_LIVE_TEST=1 go test -v -count=1 -run "TestLive|TestLifecycle" -timeout 10m ./provider/...'
 
 .PHONY: lint
 lint:

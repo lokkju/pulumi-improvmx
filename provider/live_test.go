@@ -44,12 +44,19 @@ func safetyGate(t *testing.T, client *ImprovMXClient, domain string) {
 	}
 	_ = d
 
+	// ImprovMX auto-creates a * catch-all alias — exclude it from the check
 	aliases, err := client.ListAliases(domain)
 	if err != nil {
 		t.Fatalf("Failed to list aliases for %s: %v", domain, err)
 	}
-	if len(aliases) > 0 {
-		t.Fatalf("Refusing to run: domain %s has %d existing aliases. Use a clean test domain.", domain, len(aliases))
+	nonDefaultAliases := 0
+	for _, a := range aliases {
+		if a.Alias != "*" {
+			nonDefaultAliases++
+		}
+	}
+	if nonDefaultAliases > 0 {
+		t.Fatalf("Refusing to run: domain %s has %d existing non-default aliases. Use a clean test domain.", domain, nonDefaultAliases)
 	}
 
 	creds, err := client.ListSmtpCredentials(domain)
@@ -181,6 +188,8 @@ func TestLive(t *testing.T) {
 			assert.True(t, apiErr.IsNotFound())
 		})
 		t.Run("WildcardCreate", func(t *testing.T) {
+			// ImprovMX may auto-create a * alias when domain is added — delete it first
+			_ = client.DeleteAlias(testDomain, "*")
 			alias, err := client.CreateAlias(testDomain, "*", "catchall@example.com")
 			require.NoError(t, err)
 			assert.Equal(t, "*", alias.Alias)
