@@ -105,6 +105,13 @@ func (Domain) Create(ctx context.Context, req infer.CreateRequest[DomainArgs]) (
 		}
 	}
 
+	// Trigger DNS check to activate the domain if records are configured.
+	_ = client.CheckDomain(input.Domain)
+	// Re-read to get updated active status.
+	if checked, err := client.GetDomain(input.Domain); err == nil {
+		domain = checked
+	}
+
 	return infer.CreateResponse[DomainState]{
 		ID: domain.Domain,
 		Output: DomainState{
@@ -172,6 +179,12 @@ func (Domain) Update(ctx context.Context, req infer.UpdateRequest[DomainArgs, Do
 	domain, err := client.UpdateDomain(req.ID, fields)
 	if err != nil {
 		return infer.UpdateResponse[DomainState]{}, fmt.Errorf("updating domain: %w", err)
+	}
+
+	// Trigger DNS check to activate the domain if records are configured.
+	_ = client.CheckDomain(req.ID)
+	if checked, err := client.GetDomain(req.ID); err == nil {
+		domain = checked
 	}
 
 	return infer.UpdateResponse[DomainState]{

@@ -200,6 +200,11 @@ func (c *ImprovMXClient) UpdateDomain(domain string, fields map[string]string) (
 	return &resp.Domain, nil
 }
 
+func (c *ImprovMXClient) CheckDomain(domain string) error {
+	_, err := c.request("GET", "/domains/"+domain+"/check", nil)
+	return err
+}
+
 func (c *ImprovMXClient) DeleteDomain(domain string) error {
 	_, err := c.request("DELETE", "/domains/"+domain, nil)
 	return err

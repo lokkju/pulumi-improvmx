@@ -136,6 +136,14 @@ func newMockAPIServer(t *testing.T) (*httptest.Server, *mockAPIState) {
 		})
 	})
 
+	// GET /domains/{domain}/check
+	mux.HandleFunc("GET /domains/{domain}/check", func(w http.ResponseWriter, r *http.Request) {
+		jsonResponse(w, 200, map[string]any{
+			"success": true,
+			"records": map[string]any{"valid": true},
+		})
+	})
+
 	// DELETE /domains/{domain}
 	mux.HandleFunc("DELETE /domains/{domain}", func(w http.ResponseWriter, r *http.Request) {
 		name := r.PathValue("domain")
