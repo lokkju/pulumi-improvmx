@@ -4,3 +4,4 @@ sdk/nodejs/
 sdk/dotnet/
 sdk/java/
 *.test
+.env.local

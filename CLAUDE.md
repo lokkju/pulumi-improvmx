@@ -11,7 +11,7 @@ Native cross-language Pulumi provider for [ImprovMX](https://improvmx.com/) emai
 ```bash
 make provider              # Build the provider binary
 make test                  # Unit + lifecycle tests
-make test_integration      # Live integration tests (requires IMPROVMX_LIVE_TEST=1)
+make test_live             # Live integration tests (loads .env.local, requires IMPROVMX_LIVE_TEST=1)
 make codegen               # Generate SDKs (Python, Node.js, Go, .NET)
 make install               # Install provider to GOPATH
 make lint                  # Run golangci-lint
@@ -45,8 +45,9 @@ Each resource is a Go struct implementing CRUD methods via the `pulumi-go-provid
 ### Testing Layers
 
 1. **Client unit tests** (`provider/client_test.go`) — mock HTTP server, verify request/response serialization
-2. **Lifecycle tests** (`provider/*_test.go`) — use `pulumi-go-provider/integration` for CRUD cycle validation
-3. **Live integration tests** (`provider/integration_test.go`) — real API calls, gated by `IMPROVMX_LIVE_TEST=1` env var; requires `IMPROVMX_API_TOKEN` and `IMPROVMX_TEST_DOMAIN`
+2. **Provider unit tests** (`provider/provider_test.go`) — CRUD + Diff with mock API
+3. **Live integration tests** (`provider/live_test.go`) — real API calls, gated by `IMPROVMX_LIVE_TEST=1` env var; requires `IMPROVMX_API_TOKEN` and `IMPROVMX_INTEGRATION_TEST_DOMAIN`
+4. **Pulumi lifecycle tests** (`provider/lifecycle_test.go`) — uses `pulumi-go-provider/integration`
 
 ### SDK Generation
 

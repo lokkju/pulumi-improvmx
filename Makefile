@@ -36,9 +36,10 @@ sdk/go: $(SCHEMA_FILE)
 test:
 	go test -v -count=1 -cover -timeout 2h ./provider/...
 
-.PHONY: test_integration
-test_integration:
-	IMPROVMX_LIVE_TEST=1 go test -v -count=1 -run TestLive -timeout 5m ./provider/...
+.PHONY: test_live
+test_live:
+	set -a && [ -f .env.local ] && . .env.local || true; set +a; \
+	IMPROVMX_LIVE_TEST=1 go test -v -count=1 -run 'TestLive|TestLifecycle' -timeout 10m ./provider/...
 
 .PHONY: lint
 lint:
