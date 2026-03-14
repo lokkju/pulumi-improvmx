@@ -74,7 +74,13 @@ jobs:
           tar xzf bin/*.tar.gz -C bin/
           rm -f bin/*.tar.gz
           chmod +x bin/${{ env.PROVIDER }}
-          pulumi package get-schema ./bin/${{ env.PROVIDER }} | jq -f scripts/patch-schema.jq > schema.json
+          pulumi package get-schema ./bin/${{ env.PROVIDER }} | jq -f scripts/patch-schema.jq | jq --arg v "$VERSION" '.version = $v' > schema.json
+          # Verify schema version matches tag
+          SCHEMA_VERSION=$(jq -r '.version' schema.json)
+          if [ "$SCHEMA_VERSION" != "$VERSION" ]; then
+            echo "ERROR: schema version ($SCHEMA_VERSION) does not match tag version ($VERSION)"
+            exit 1
+          fi
           pulumi package gen-sdk --language python schema.json --version "$VERSION"
           pulumi package gen-sdk --language nodejs schema.json --version "$VERSION"
           pulumi package gen-sdk --language dotnet schema.json --version "$VERSION"
