@@ -40,9 +40,11 @@ func Provider() p.Provider {
 }
 
 type ProviderConfig struct {
-	ApiToken string `pulumi:"apiToken,optional" provider:"secret"`
+	ApiToken     string `pulumi:"apiToken,optional" provider:"secret"`
+	AutoCheckDNS *bool  `pulumi:"autoCheckDns,optional"`
 }
 
 func (c *ProviderConfig) Annotate(a infer.Annotator) {
 	a.Describe(&c.ApiToken, "The ImprovMX API token. Can also be set via IMPROVMX_API_TOKEN env var.")
+	a.Describe(&c.AutoCheckDNS, "Automatically trigger DNS validation after domain create/update/read to activate forwarding. Defaults to true.")
 }

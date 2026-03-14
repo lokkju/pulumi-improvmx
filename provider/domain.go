@@ -60,6 +60,18 @@ func getClient(ctx context.Context) (*ImprovMXClient, error) {
 	return client, nil
 }
 
+// shouldAutoCheckDNS returns true if the provider should auto-trigger DNS checks.
+// Defaults to true if not configured.
+func shouldAutoCheckDNS(ctx context.Context) bool {
+	var autoCheck *bool
+	func() {
+		defer func() { recover() }()
+		config := infer.GetConfig[ProviderConfig](ctx)
+		autoCheck = config.AutoCheckDNS
+	}()
+	return autoCheck == nil || *autoCheck
+}
+
 func (Domain) Create(ctx context.Context, req infer.CreateRequest[DomainArgs]) (infer.CreateResponse[DomainState], error) {
 	input := req.Inputs
 	if req.DryRun {
@@ -106,10 +118,11 @@ func (Domain) Create(ctx context.Context, req infer.CreateRequest[DomainArgs]) (
 	}
 
 	// Trigger DNS check to activate the domain if records are configured.
-	_ = client.CheckDomain(input.Domain)
-	// Re-read to get updated active status.
-	if checked, err := client.GetDomain(input.Domain); err == nil {
-		domain = checked
+	if shouldAutoCheckDNS(ctx) {
+		_ = client.CheckDomain(input.Domain)
+		if checked, err := client.GetDomain(input.Domain); err == nil {
+			domain = checked
+		}
 	}
 
 	return infer.CreateResponse[DomainState]{
@@ -133,6 +146,14 @@ func (Domain) Read(ctx context.Context, req infer.ReadRequest[DomainArgs, Domain
 			return infer.ReadResponse[DomainArgs, DomainState]{ID: ""}, nil
 		}
 		return infer.ReadResponse[DomainArgs, DomainState]{}, fmt.Errorf("reading domain: %w", err)
+	}
+
+	// If domain is inactive, try to activate it via DNS check.
+	if !domain.Active && shouldAutoCheckDNS(ctx) {
+		_ = client.CheckDomain(domain.Domain)
+		if checked, err := client.GetDomain(domain.Domain); err == nil {
+			domain = checked
+		}
 	}
 
 	args := DomainArgs{
@@ -182,9 +203,11 @@ func (Domain) Update(ctx context.Context, req infer.UpdateRequest[DomainArgs, Do
 	}
 
 	// Trigger DNS check to activate the domain if records are configured.
-	_ = client.CheckDomain(req.ID)
-	if checked, err := client.GetDomain(req.ID); err == nil {
-		domain = checked
+	if shouldAutoCheckDNS(ctx) {
+		_ = client.CheckDomain(req.ID)
+		if checked, err := client.GetDomain(req.ID); err == nil {
+			domain = checked
+		}
 	}
 
 	return infer.UpdateResponse[DomainState]{
