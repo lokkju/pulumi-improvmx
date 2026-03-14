@@ -39,15 +39,25 @@ func (d *DomainState) Annotate(a infer.Annotator) {
 }
 
 func getClient(ctx context.Context) (*ImprovMXClient, error) {
-	config := infer.GetConfig[ProviderConfig](ctx)
-	token := config.ApiToken
+	// Check env var first — this path is always safe and supports unit testing
+	// without a full Pulumi provider context.
+	token := os.Getenv("IMPROVMX_API_TOKEN")
 	if token == "" {
-		token = os.Getenv("IMPROVMX_API_TOKEN")
+		// Try Pulumi config (may panic if ctx is not a Pulumi context)
+		func() {
+			defer func() { recover() }()
+			config := infer.GetConfig[ProviderConfig](ctx)
+			token = config.ApiToken
+		}()
 	}
 	if token == "" {
 		return nil, fmt.Errorf("ImprovMX API token not configured: set improvmx:apiToken in Pulumi config or IMPROVMX_API_TOKEN env var")
 	}
-	return NewImprovMXClient(token), nil
+	client := NewImprovMXClient(token)
+	if baseURL := os.Getenv("IMPROVMX_BASE_URL"); baseURL != "" {
+		client.baseURL = baseURL
+	}
+	return client, nil
 }
 
 func (Domain) Create(ctx context.Context, req infer.CreateRequest[DomainArgs]) (infer.CreateResponse[DomainState], error) {
