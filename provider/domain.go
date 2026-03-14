@@ -148,8 +148,8 @@ func (Domain) Read(ctx context.Context, req infer.ReadRequest[DomainArgs, Domain
 		return infer.ReadResponse[DomainArgs, DomainState]{}, fmt.Errorf("reading domain: %w", err)
 	}
 
-	// If domain is inactive, try to activate it via DNS check.
-	if !domain.Active && shouldAutoCheckDNS(ctx) {
+	// If domain is inactive, always trigger DNS check during Read so state is accurate.
+	if !domain.Active {
 		_ = client.CheckDomain(domain.Domain)
 		if checked, err := client.GetDomain(domain.Domain); err == nil {
 			domain = checked
