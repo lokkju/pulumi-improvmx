@@ -179,10 +179,8 @@ func (SmtpCredential) Diff(ctx context.Context, req infer.DiffRequest[SmtpCreden
 	if req.Inputs.Password != req.State.Password {
 		diff["password"] = p.PropertyDiff{Kind: p.Update}
 	}
-	_, domainReplace := diff["domain"]
-	_, usernameReplace := diff["username"]
 	return infer.DiffResponse{
-		DeleteBeforeReplace: domainReplace || usernameReplace,
+		DeleteBeforeReplace: false, // always create-before-delete to preserve existing resources
 		HasChanges:          len(diff) > 0,
 		DetailedDiff:        diff,
 	}, nil

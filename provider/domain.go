@@ -210,9 +210,8 @@ func (Domain) Diff(ctx context.Context, req infer.DiffRequest[DomainArgs, Domain
 		diff["webhook"] = p.PropertyDiff{Kind: p.Update}
 	}
 
-	_, hasReplace := diff["domain"]
 	return infer.DiffResponse{
-		DeleteBeforeReplace: hasReplace,
+		DeleteBeforeReplace: false, // always create-before-delete to avoid cascade-deleting aliases
 		HasChanges:          len(diff) > 0,
 		DetailedDiff:        diff,
 	}, nil

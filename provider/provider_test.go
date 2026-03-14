@@ -134,7 +134,7 @@ func TestDomainDiff_Replace(t *testing.T) {
 	})
 	require.NoError(t, err)
 	assert.True(t, resp.HasChanges)
-	assert.True(t, resp.DeleteBeforeReplace, "changing domain should trigger DeleteBeforeReplace")
+	assert.False(t, resp.DeleteBeforeReplace, "should never delete-before-replace to avoid cascade deletes")
 	assert.Equal(t, p.UpdateReplace, resp.DetailedDiff["domain"].Kind)
 }
 
@@ -211,7 +211,7 @@ func TestAliasDiff_ReplaceAlias(t *testing.T) {
 	})
 	require.NoError(t, err)
 	assert.True(t, resp.HasChanges)
-	assert.True(t, resp.DeleteBeforeReplace, "changing alias should trigger replace")
+	assert.False(t, resp.DeleteBeforeReplace, "should never delete-before-replace")
 	assert.Equal(t, p.UpdateReplace, resp.DetailedDiff["alias"].Kind)
 }
 
@@ -222,7 +222,7 @@ func TestAliasDiff_ReplaceDomain(t *testing.T) {
 	})
 	require.NoError(t, err)
 	assert.True(t, resp.HasChanges)
-	assert.True(t, resp.DeleteBeforeReplace, "changing domain should trigger replace")
+	assert.False(t, resp.DeleteBeforeReplace, "should never delete-before-replace")
 	assert.Equal(t, p.UpdateReplace, resp.DetailedDiff["domain"].Kind)
 }
 
@@ -312,6 +312,6 @@ func TestCredentialDiff_ReplaceUsername(t *testing.T) {
 	})
 	require.NoError(t, err)
 	assert.True(t, resp.HasChanges)
-	assert.True(t, resp.DeleteBeforeReplace, "changing username should trigger replace")
+	assert.False(t, resp.DeleteBeforeReplace, "should never delete-before-replace")
 	assert.Equal(t, p.UpdateReplace, resp.DetailedDiff["username"].Kind)
 }

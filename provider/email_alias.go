@@ -148,10 +148,8 @@ func (EmailAlias) Diff(ctx context.Context, req infer.DiffRequest[EmailAliasArgs
 	if req.Inputs.Forward != req.State.Forward {
 		diff["forward"] = p.PropertyDiff{Kind: p.Update}
 	}
-	_, domainReplace := diff["domain"]
-	_, aliasReplace := diff["alias"]
 	return infer.DiffResponse{
-		DeleteBeforeReplace: domainReplace || aliasReplace,
+		DeleteBeforeReplace: false, // always create-before-delete to preserve existing resources
 		HasChanges:          len(diff) > 0,
 		DetailedDiff:        diff,
 	}, nil
