@@ -18,7 +18,7 @@
     },
     "go": {
       "generateResourceContainerTypes": true,
-      "importBasePath": "https://github.com/lokkju/pulumi-improvmx/sdk/go/improvmx",
+      "importBasePath": "github.com/lokkju/pulumi-improvmx/sdk/go/improvmx",
       "respectSchemaVersion": true
     },
     "nodejs": {
@@ -39,6 +39,10 @@
         "type": "string",
         "description": "The ImprovMX API token. Can also be set via IMPROVMX_API_TOKEN env var.",
         "secret": true
+      },
+      "autoCheckDns": {
+        "type": "boolean",
+        "description": "Automatically trigger DNS validation after domain create/update/read to activate forwarding. Defaults to true."
       }
     }
   },
@@ -48,6 +52,10 @@
         "type": "string",
         "description": "The ImprovMX API token. Can also be set via IMPROVMX_API_TOKEN env var.",
         "secret": true
+      },
+      "autoCheckDns": {
+        "type": "boolean",
+        "description": "Automatically trigger DNS validation after domain create/update/read to activate forwarding. Defaults to true."
       }
     },
     "inputProperties": {
@@ -55,6 +63,10 @@
         "type": "string",
         "description": "The ImprovMX API token. Can also be set via IMPROVMX_API_TOKEN env var.",
         "secret": true
+      },
+      "autoCheckDns": {
+        "type": "boolean",
+        "description": "Automatically trigger DNS validation after domain create/update/read to activate forwarding. Defaults to true."
       }
     }
   },

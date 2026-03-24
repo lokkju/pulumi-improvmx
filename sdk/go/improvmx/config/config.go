@@ -4,7 +4,7 @@
 package config
 
 import (
-	"github.com/lokkju/improvmx/sdk/go/improvmx/internal"
+	"github.com/lokkju/pulumi-improvmx/sdk/go/improvmx/internal"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
 )
@@ -14,4 +14,9 @@ var _ = internal.GetEnvOrDefault
 // The ImprovMX API token. Can also be set via IMPROVMX_API_TOKEN env var.
 func GetApiToken(ctx *pulumi.Context) string {
 	return config.Get(ctx, "improvmx:apiToken")
+}
+
+// Automatically trigger DNS validation after domain create/update/read to activate forwarding. Defaults to true.
+func GetAutoCheckDns(ctx *pulumi.Context) bool {
+	return config.GetBool(ctx, "improvmx:autoCheckDns")
 }

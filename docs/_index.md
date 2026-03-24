@@ -78,7 +78,7 @@ var alias = new PulumiImprovmx.EmailAlias("catch-all", new PulumiImprovmx.EmailA
 package main
 
 import (
-	"github.com/lokkju/improvmx/sdk/go/improvmx"
+	"github.com/lokkju/pulumi-improvmx/sdk/go/improvmx"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 

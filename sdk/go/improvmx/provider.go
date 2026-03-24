@@ -7,7 +7,7 @@ import (
 	"context"
 	"reflect"
 
-	"github.com/lokkju/improvmx/sdk/go/improvmx/internal"
+	"github.com/lokkju/pulumi-improvmx/sdk/go/improvmx/internal"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
@@ -44,12 +44,16 @@ func NewProvider(ctx *pulumi.Context,
 type providerArgs struct {
 	// The ImprovMX API token. Can also be set via IMPROVMX_API_TOKEN env var.
 	ApiToken *string `pulumi:"apiToken"`
+	// Automatically trigger DNS validation after domain create/update/read to activate forwarding. Defaults to true.
+	AutoCheckDns *bool `pulumi:"autoCheckDns"`
 }
 
 // The set of arguments for constructing a Provider resource.
 type ProviderArgs struct {
 	// The ImprovMX API token. Can also be set via IMPROVMX_API_TOKEN env var.
 	ApiToken pulumi.StringPtrInput
+	// Automatically trigger DNS validation after domain create/update/read to activate forwarding. Defaults to true.
+	AutoCheckDns pulumi.BoolPtrInput
 }
 
 func (ProviderArgs) ElementType() reflect.Type {

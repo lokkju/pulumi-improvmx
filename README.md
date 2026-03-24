@@ -5,7 +5,7 @@
 [![PyPI](https://img.shields.io/pypi/v/pulumi-improvmx)](https://pypi.org/project/pulumi-improvmx/)
 [![npm](https://img.shields.io/npm/v/pulumi-improvmx)](https://www.npmjs.com/package/pulumi-improvmx)
 [![NuGet](https://img.shields.io/nuget/v/Lokkju.Improvmx)](https://www.nuget.org/packages/Lokkju.Improvmx)
-[![Go Reference](https://pkg.go.dev/badge/github.com/lokkju/improvmx/sdk/go/improvmx.svg)](https://pkg.go.dev/github.com/lokkju/improvmx/sdk/go/improvmx)
+[![Go Reference](https://pkg.go.dev/badge/github.com/lokkju/pulumi-improvmx/sdk/go/improvmx.svg)](https://pkg.go.dev/github.com/lokkju/pulumi-improvmx/sdk/go/improvmx)
 
 A native Pulumi provider for managing [ImprovMX](https://improvmx.com/) email forwarding resources.
 
@@ -32,7 +32,7 @@ npm install pulumi-improvmx
 ### Go
 
 ```bash
-go get github.com/lokkju/improvmx/sdk/go/improvmx
+go get github.com/lokkju/pulumi-improvmx/sdk/go/improvmx
 ```
 
 ## Configuration

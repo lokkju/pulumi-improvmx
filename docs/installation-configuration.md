@@ -29,7 +29,7 @@ dotnet add package Pulumi.Improvmx
 ### Go
 
 ```bash
-go get github.com/lokkju/improvmx/sdk/go/improvmx
+go get github.com/lokkju/pulumi-improvmx/sdk/go/improvmx
 ```
 
 ## Configuration

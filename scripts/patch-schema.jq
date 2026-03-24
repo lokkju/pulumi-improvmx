@@ -1,6 +1,7 @@
 del(.version)
 | .language.nodejs.packageName = "pulumi-improvmx"
 | .language.python.packageName = "pulumi_improvmx"
+| .language.go.importBasePath = "github.com/lokkju/pulumi-improvmx/sdk/go/improvmx"
 | .resources["improvmx:index:Domain"].inputProperties.domain.language.csharp.name = "DomainName"
 | .resources["improvmx:index:Domain"].properties.domain.language.csharp.name = "DomainName"
 | .resources["improvmx:index:EmailAlias"].inputProperties.domain.language.csharp.name = "DomainName"
